@@ -1,0 +1,30 @@
+<html>
+    <head>
+        <style>
+            img {
+                max-width:100%;
+                height:auto;
+                max-height:100%;
+            }
+        </style>
+    </head>
+    <body>
+        <h1 align="center"><%= restaurant[0].name %></h1></br>
+        <% if (restaurant[0].photo != null) { %>
+            <img src="data:<%= restaurant[0].photo_mimetype %>;base64, <%= restaurant[0].photo%>""><br>
+        <% } %>
+        Borough: <%= restaurant[0].borough %></br>
+        Cuisine: <%= restaurant[0].cuisine %></br>
+        Street: <%= restaurant[0].address.street %></br>
+        Building: <%= restaurant[0].address.building %></br>
+        Zipcode: <%= restaurant[0].address.zipcode %></br>
+        GPS: <%= restaurant[0].address.coord %></br>
+        Rating: 
+        <% for (r in restaurant[0].grades) { %>
+            <%= restaurant[0].grades[i].score%> (<%= restaurant[0].grades[i].user %>)<br>
+        <% } %>
+        <br>
+        Created by: <%= restaurant[0].owner %><br>
+        <a href=/restaurants>Back</a>
+    </body>
+</html>
