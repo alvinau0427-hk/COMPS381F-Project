@@ -1,30 +1,35 @@
 <html>
     <head>
-        <style>
-            img {
-                max-width:100%;
-                height:auto;
-                max-height:100%;
-            }
-        </style>
+        <title>Detail of <%= restaurant[0].name %></title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.0/css/bootstrap.min.css" integrity="sha384-SI27wrMjH3ZZ89r4o+fGIJtnzkAnFs3E4qz9DIYioCQ5l9Rd/7UAa8DHcaL8jkWt" crossorigin="anonymous">
+	    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+	    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+	    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.0/js/bootstrap.min.js" integrity="sha384-3qaqj0lc6sV/qpzrc1N5DC6i1VRn/HyX4qdPaiEFbn54VjQBEU341pvjz7Dv3n6P" crossorigin="anonymous"></script>
     </head>
     <body>
-        <h1 align="center"><%= restaurant[0].name %></h1></br>
-        <% if (restaurant[0].photo != null) { %>
-            <img src="data:<%= restaurant[0].photo_mimetype %>;base64, <%= restaurant[0].photo%>""><br>
-        <% } %>
-        Borough: <%= restaurant[0].borough %></br>
-        Cuisine: <%= restaurant[0].cuisine %></br>
-        Street: <%= restaurant[0].address.street %></br>
-        Building: <%= restaurant[0].address.building %></br>
-        Zipcode: <%= restaurant[0].address.zipcode %></br>
-        GPS: <%= restaurant[0].address.coord %></br>
-        Rating: 
-        <% for (r in restaurant[0].grades) { %>
-            <%= restaurant[0].grades[i].score%> (<%= restaurant[0].grades[i].user %>)<br>
-        <% } %>
-        <br>
-        Created by: <%= restaurant[0].owner %><br>
-        <a href=/restaurants>Back</a>
+        <nav class="navbar navbar-light bg-light">
+            <span class="navbar-brand mb-0 h1"><%= restaurant[0].name %></span>
+        </nav>
+        <div class="container">
+            <% if (restaurant[0].photo) { %>
+                <img src="data:<%= restaurant[0].photo_mimetype %>;base64, <%= restaurant[0].photo%>""><br>
+            <% } %>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">Borough: <%= restaurant[0].borough %></li>
+                <li class="list-group-item">Cuisine: <%= restaurant[0].cuisine %></li>
+                <li class="list-group-item">Street: <%= restaurant[0].address.street %></li>
+                <li class="list-group-item">Building: <%= restaurant[0].address.building %></li>
+                <li class="list-group-item">Zipcode: <%= restaurant[0].address.zipcode %></li>
+                <li class="list-group-item">GPS: <%= restaurant[0].address.coord %></li>
+                <li class="list-group-item">
+                    Rating: </br>
+                    <% for (r in restaurant[0].grades) { %>
+                        <%= restaurant[0].grades[i].score%> (<%= restaurant[0].grades[i].user %>)<br>
+                    <% } %>
+                </li>
+                <li class="list-group-item">Created by: <%= restaurant[0].owner %></li>
+            </ul>
+            <a class="btn btn-primary" href=/restaurants role="button">Back</a>
+        </div>
     </body>
 </html>
