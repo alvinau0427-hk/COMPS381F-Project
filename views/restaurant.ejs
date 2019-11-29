@@ -29,6 +29,13 @@
                 </li>
                 <li class="list-group-item">Created by: <%= restaurant[0].owner %></li>
             </ul>
+            <% if (restaurant[0].address.coord[0] && restaurant[0].address.coord[1]) { %>
+                <a class="btn btn-primary" href=/map?lat=<%= restaurant[0].address.coord[0] %>&long=<%= restaurant[0].address.coord[1] %> role="button">Show on map</a>
+            <% } %>
+            <% if (session.username == restaurant[0].owner) { %>
+                <a class="btn btn-primary" href=/delete?_id=<%= restaurant[0]._id %> role="button">Delete</a>
+                <a class="btn btn-primary" href=/update?_id=<%= restaurant[0]._id %> role="button">Update</a>
+            <% } %>
             <a class="btn btn-primary" href=/restaurants role="button">Back</a>
         </div>
     </body>
