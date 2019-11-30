@@ -12,7 +12,7 @@
     </nav>
     <div class="container">
         <form action="/update" method="post" enctype="multipart/form-data">
-            <input type="hidden" id="_id" name="_id" value=<%= restaurant[0]._id %>>
+            <input type="hidden" id="_id" name="_id" value="<%= restaurant[0]._id %>">
             <div class="form-group">
                 <label for="name">Restaurant Name</label>
                 <input type="text" class="form-control" id="name" name="name" value="<%= restaurant[0].name %>" minlength="1">

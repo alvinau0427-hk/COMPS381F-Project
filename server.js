@@ -24,7 +24,7 @@ const users = new Array(
 
 //login check middleware
 app.use((req,res,next) => {
-    if (req.originalUrl === '/login') {
+    if (req.originalUrl == '/login' || req.originalUrl.includes('/api')) {
         return next();
     } else {
         if (!req.session.authenticated) {
@@ -215,7 +215,6 @@ app.post('/update', (req,res) => {
         new_r['address']['building'] = fields.building || '';
         new_r['address']['zipcode'] = fields.zipcode || '';
         new_r['address']['coord'] = [fields.lat || '',fields.long || ''];
-        new_r['grades'] = [];
         new_r['owner'] = req.session.username;
         if (files.photo.size == 0) {
             let client = new MongoClient(mongourl);
@@ -226,11 +225,14 @@ app.post('/update', (req,res) => {
                     res.status(500).end("MongoClient connect() failed!");
                 }
                 const db = client.db(dbName);
-                new_r['photo'] = '';
-                new_r['photo_mimetype'] = '';
-                updateRestaurants(db,fields._id,new_r,(result) => {
-                    client.close();
-                    res.redirect(`/detail?_id=${fields._id}`);
+                findRestaurants(db,{_id:ObjectID(fields._id)},(restaurant) => {
+                    new_r['grades'] = restaurant[0].grades;
+                    new_r['photo'] = restaurant[0].photo;
+                    new_r['photo_mimetype'] = restaurant[0].photo_mimetype;
+                    updateRestaurants(db,fields._id,new_r,(result) => {
+                        client.close();
+                        res.redirect(`/detail?_id=${fields._id}`);
+                    });
                 });
             });
         } else {
@@ -243,11 +245,14 @@ app.post('/update', (req,res) => {
                         res.status(500).end("MongoClient connect() failed!");
                     }
                     const db = client.db(dbName);
-                    new_r['photo'] = new Buffer.from(data).toString('base64');
-                    new_r['photo_mimetype'] = files.photo.type;
-                    updateRestaurants(db,fields._id,new_r,(result) => {
-                        client.close();
-                        res.redirect(`/detail?_id=${fields._id}`);
+                    findRestaurants(db,{_id:ObjectID(fields._id)},(restaurant) => {
+                        new_r['grades'] = restaurant[0].grades;
+                        new_r['photo'] = new Buffer.from(data).toString('base64');
+                        new_r['photo_mimetype'] = files.photo.type;
+                        updateRestaurants(db,fields._id,new_r,(result) => {
+                            client.close();
+                            res.redirect(`/detail?_id=${fields._id}`);
+                        });
                     });
                 });
             });
@@ -271,6 +276,49 @@ app.get('/delete', (req,res) => {
             client.close();
             console.log('Disconnected MongoDB');
             res.redirect('/restaurants');
+        });
+    });
+});
+
+app.get('/rate', (req,res) => {
+    let client = new MongoClient(mongourl);
+    client.connect((err) => {
+        try {
+            assert.equal(err,null);
+        } catch (err) {
+            res.status(500).end("MongoClient connect() failed!");
+        }
+        console.log('Connected to MongoDB');
+        const db = client.db(dbName);
+        let criteria = {};
+        criteria['_id'] = ObjectID(req.query._id);
+        findRestaurants(db,criteria,(restaurant) => {
+            client.close();
+            console.log('Disconnected MongoDB');
+            console.log('Restaurant returned = ' + restaurant.length);
+            console.log(restaurant[0].grades);
+            res.render('rate.ejs',{restaurant:restaurant});
+        });
+    });
+});
+
+app.post('/rate', (req,res) => {
+    let client = new MongoClient(mongourl);
+    client.connect((err) => {
+        try {
+            assert.equal(err,null);
+        } catch (err) {
+            res.status(500).end("MongoClient connect() failed!");
+        }
+        console.log("Connected to MongoDB");
+        const db = client.db(dbName);
+        let grade = {};
+        grade.score = req.body.rating;
+        grade.user = req.session.username;
+        addRating(db,req.body.r_id,grade,(result) => {
+            client.close();
+            console.log("Disconnected MongoDB");
+            res.redirect(`/detail?_id=${req.body.r_id}`);
         });
     });
 });
@@ -340,6 +388,28 @@ app.get('/api/restaurant/cuisine/:cuisine', (req,res) => {
     });
 });
 
+app.post('/api/restaurant', (req,res) => {
+    let new_r = req.body;
+    let client = new MongoClient(mongourl);
+    client.connect((err) => {
+        try {
+            assert.equal(err,null);
+        } catch (err) {
+            let message = {};
+            message.status = "failed";
+            res.status(500).type('json').json(message).end();
+        }
+        console.log('Connected to MongoDB');
+        const db = client.db(dbName);
+        insertRestaurants(db,new_r,(result) => {
+            let success = {};
+            success.status = "ok";
+            success._id = new_r._id;
+            res.status(200).type('json').json(success).end();
+        });
+    });
+});
+
 app.listen(process.env.PORT || 8099);
 
 const findRestaurants = (db,criteria,callback) => {
@@ -369,6 +439,15 @@ const updateRestaurants = (db,r_id,doc,callback) => {
         console.log(JSON.stringify(result));
         callback(result);
     });
+}
+
+const addRating = (db,r_id,grade,callback) => {
+    db.collection('restaurants').updateOne({_id: ObjectID(r_id)},{$push:{grades:grade}},(err,result) => {
+        assert.equal(err,null);
+        console.log("rating added successfully");
+        console.log(JSON.stringify(result));
+        callback(result);
+    })
 }
 
 const deleteRestaurants = (db,r,callback) => {

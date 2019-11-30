@@ -8,9 +8,10 @@
     </head>
     <body>
         <nav class="navbar navbar-light bg-light">
-            <span class="navbar-brand mb-0 h1"><%= restaurant[0].name %></span>
+            <span class="navbar-brand mb-0 h1">Restaurant Detail</span>
         </nav>
         <div class="container">
+            <H1><%= restaurant[0].name %></H1>
             <% if (restaurant[0].photo) { %>
                 <img src="data:<%= restaurant[0].photo_mimetype %>;base64, <%= restaurant[0].photo%>""><br>
             <% } %>
@@ -24,7 +25,7 @@
                 <li class="list-group-item">
                     Rating: </br>
                     <% for (r in restaurant[0].grades) { %>
-                        <%= restaurant[0].grades[i].score%> (<%= restaurant[0].grades[i].user %>)<br>
+                        <%= restaurant[0].grades[r].score%> (<%= restaurant[0].grades[r].user %>)<br>
                     <% } %>
                 </li>
                 <li class="list-group-item">Created by: <%= restaurant[0].owner %></li>
@@ -35,6 +36,14 @@
             <% if (session.username == restaurant[0].owner) { %>
                 <a class="btn btn-primary" href=/delete?_id=<%= restaurant[0]._id %> role="button">Delete</a>
                 <a class="btn btn-primary" href=/update?_id=<%= restaurant[0]._id %> role="button">Update</a>
+            <% } %>
+            <% if (restaurant[0].grades.length == 0) { %>
+                <a class="btn btn-primary" href=/rate?_id=<%= restaurant[0]._id %> role="button">Rate this restaurant</a>
+            <% } %>
+            <% for (r in restaurant[0].grades) { %>
+                <% if (restaurant[0].grades[r].user != session.username) { %>
+                    <a class="btn btn-primary" href=/rate?_id=<%= restaurant[0]._id %> role="button">Rate this restaurant</a>
+                <% } %>
             <% } %>
             <a class="btn btn-primary" href=/restaurants role="button">Back</a>
         </div>
