@@ -328,7 +328,7 @@ app.get('/logout', (req,res) => {
     res.redirect("/login");
 });
 
-app.get('/api/restaurant/name/:name', (req,res) => {
+app.get('/api/restaurant/:key/:value', (req,res) => {
     let client = new MongoClient(mongourl);
     client.connect((err) => {
         try {
@@ -339,47 +339,7 @@ app.get('/api/restaurant/name/:name', (req,res) => {
         console.log('Connected to MongoDB');
         const db = client.db(dbName);
         let criteria = {};
-        criteria['name'] = req.params.name;
-        findRestaurants(db,criteria,(restaurants) => {
-            client.close();
-            console.log('Disconnected MongoDB');
-            res.status(200).type('json').json(restaurants).end();
-        });
-    });
-});
-
-app.get('/api/restaurant/borough/:borough', (req,res) => {
-    let client = new MongoClient(mongourl);
-    client.connect((err) => {
-        try {
-            assert.equal(err,null);
-        } catch (err) {
-            res.status(500).end('MongoClient connect() failed!');
-        }
-        console.log('Connected to MongoDB');
-        const db = client.db(dbName);
-        let criteria = {};
-        criteria['borough'] = req.params.borough;
-        findRestaurants(db,criteria,(restaurants) => {
-            client.close();
-            console.log('Disconnected MongoDB');
-            res.status(200).type('json').json(restaurants).end();
-        });
-    });
-});
-
-app.get('/api/restaurant/cuisine/:cuisine', (req,res) => {
-    let client = new MongoClient(mongourl);
-    client.connect((err) => {
-        try {
-            assert.equal(err,null);
-        } catch (err) {
-            res.status(500).end('MongoClient connect() failed!');
-        }
-        console.log('Connected to MongoDB');
-        const db = client.db(dbName);
-        let criteria = {};
-        criteria['cuisine'] = req.params.cuisine;
+        criteria[req.params.key] = req.params.value;
         findRestaurants(db,criteria,(restaurants) => {
             client.close();
             console.log('Disconnected MongoDB');
