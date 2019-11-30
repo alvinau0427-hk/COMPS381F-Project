@@ -37,9 +37,6 @@
                 <a class="btn btn-primary" href=/delete?_id=<%= restaurant[0]._id %> role="button">Delete</a>
                 <a class="btn btn-primary" href=/update?_id=<%= restaurant[0]._id %> role="button">Update</a>
             <% } %>
-            <% if (restaurant[0].grades.length == 0) { %>
-                <a class="btn btn-primary" href=/rate?_id=<%= restaurant[0]._id %> role="button">Rate this restaurant</a>
-            <% } %>
             <% var count = 0; %>
             <% for (r in restaurant[0].grades) { %>
                 <% if (restaurant[0].grades[r].user == session.username) { %>
