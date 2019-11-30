@@ -40,10 +40,14 @@
             <% if (restaurant[0].grades.length == 0) { %>
                 <a class="btn btn-primary" href=/rate?_id=<%= restaurant[0]._id %> role="button">Rate this restaurant</a>
             <% } %>
+            <% var count = 0; %>
             <% for (r in restaurant[0].grades) { %>
-                <% if (restaurant[0].grades[r].user != session.username) { %>
-                    <a class="btn btn-primary" href=/rate?_id=<%= restaurant[0]._id %> role="button">Rate this restaurant</a>
+                <% if (restaurant[0].grades[r].user == session.username) { %>
+                    <% count++; %>
                 <% } %>
+            <% } %>
+            <% if (count == 0) { %>
+                <a class="btn btn-primary" href=/rate?_id=<%= restaurant[0]._id %> role="button">Rate this restaurant</a>
             <% } %>
             <a class="btn btn-primary" href=/restaurants role="button">Back</a>
         </div>
