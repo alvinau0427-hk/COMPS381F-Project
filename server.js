@@ -6,6 +6,7 @@ const assert = require('assert');
 const ObjectID = require('mongodb').ObjectID;
 const mongourl = "mongodb+srv://kaze:2RmgE3TmtS8qUUGY@cluster0-rhlsu.azure.mongodb.net/test?retryWrites=true&w=majority";
 const dbName = "test";
+const flash = require('connect-flash');
 const fs = require('fs');
 const formidable = require('formidable');
 const app = express();
@@ -17,6 +18,14 @@ app.use(session({
     keys: ['secret']
 }));
 
+app.use(flash());
+app.use(function(req, res, next) {
+	res.locals.success_msg = req.flash('success_msg');
+	res.locals.error_msg = req.flash('error_msg');
+	res.locals.error = req.flash('error');
+	next();
+});
+
 const users = new Array(
 	{name: 'demo01', password: ''},
 	{name: 'demo02', password: ''}
@@ -27,9 +36,9 @@ app.use((req,res,next) => {
     if (req.originalUrl == '/login' || req.originalUrl.includes('/api')) {
         return next();
     } else {
-        if (!req.session.authenticated) {
+        if (!req.session.authenticated && req.originalUrl != '/register') {
             res.redirect('/login');
-        } else {
+        }else {
             return next();
         }
     }
@@ -39,7 +48,7 @@ app.use(bodyParser.json());
 
 app.use(bodyParser.urlencoded({extended:true}));
 
-app.get('/',(req,res) => {
+app.get('/', (req,res) => {
     res.redirect('/restaurants');
 });
 
@@ -54,7 +63,38 @@ app.post('/login', (req,res) => {
             req.session.username = user.name;
         }
     });
-    res.redirect('/restaurants');
+    if (req.session.authenticated != true) {
+    	req.flash('error_msg', 'Please enter the correct user name with password');
+    	res.redirect('/login');
+    } else {
+    	res.redirect('/restaurants');
+    }
+});
+
+app.get('/register', (req,res) => {
+	res.status(200).render('register.ejs');
+});
+
+app.post('/register', (req,res) => {
+	let chkRegister = 0;
+	users.forEach((user) => {
+        if (user.name == req.body.name) {
+        	chkRegister += 1;
+        }
+    });
+	if (chkRegister != 0) {
+		chkRegister = 0;
+		req.flash('error_msg', 'The user account already exists');
+		res.redirect('/register');
+	} else {
+		chkRegister = 0;
+		let newUser = {};
+		newUser['name'] = req.body.name;
+		newUser['password'] = req.body.password;
+		users.push(newUser);
+    	req.flash('success_msg', 'You are now registered and can be login');
+    	res.redirect('/login');
+    }
 });
 
 app.get('/restaurants', (req,res) => {
@@ -370,7 +410,8 @@ app.post('/api/restaurant', (req,res) => {
     });
 });
 
-app.listen(process.env.PORT || 8099);
+const PORT = process.env.PORT || 8099;
+app.listen(PORT, console.log(`Server started on port ${PORT}`));
 
 const findRestaurants = (db,criteria,callback) => {
     const cursor = db.collection("restaurants").find(criteria);
